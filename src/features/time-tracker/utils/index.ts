@@ -1,6 +1,8 @@
 import type { Activity } from '../types';
 import { formatDate, formatTime, calculateHoursDifference, formatHours } from '@/utils/dateUtils';
 
+export * from './timeValidation';
+
 /**
  * Formatea una actividad para mostrar
  */

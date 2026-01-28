@@ -12,7 +12,7 @@ interface ActivityTableProps {
 }
 
 export const ActivityTable = ({ activities }: ActivityTableProps) => {
-  const deleteActivity = useDeleteActivity();
+  const deleteActivityMutation = useDeleteActivity();
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -38,15 +38,15 @@ export const ActivityTable = ({ activities }: ActivityTableProps) => {
     <>
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-slate-900 text-white">
+            <thead style={{ backgroundColor: '#a71900' }} className="text-white">
             <tr>
               <th className="px-6 py-3 text-left text-sm font-semibold">Actividad</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold">Fecha de inicio</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold">Fecha de cierre</th>
-              {/* <th className="px-6 py-3 text-left text-sm font-semibold">Estado</th> */}
+              <th className="px-6 py-3 text-left text-sm font-semibold">Hora de inicio</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold">Hora de cierre</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold">Estado</th>
               <th className="px-6 py-3 text-left text-sm font-semibold">Acción</th>
             </tr>
-          </thead>
+            </thead>
           <tbody className="divide-y divide-slate-200">
             {activities.map((activity) => {
               const formatted = formatActivityForDisplay(activity);
@@ -59,25 +59,26 @@ export const ActivityTable = ({ activities }: ActivityTableProps) => {
                     </div>
                   </td>
                   <td className="px-6 py-4 text-sm text-slate-600">
-                    {formatted.formattedDate} {formatted.formattedStartTime}
+                    {/* {formatted.formattedDate}  */}
+                    {formatted.formattedStartTime}
                   </td>
                   <td className="px-6 py-4 text-sm text-slate-600">
                     {formatted.formattedEndTime}
                   </td>
-                  {/* <td className="px-6 py-4">
+                  <td className="px-6 py-4">
                     <span
-                      className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
-                        activity.status === 'Pendiente'
+                      className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${activity.status === 'Pendiente'
                           ? 'bg-yellow-100 text-yellow-800'
                           : activity.status === 'Completada'
                             ? 'bg-green-100 text-green-800'
                             : 'bg-red-100 text-red-800'
-                      }`}
+                        }`}
                     >
                       {activity.status}
                     </span>
-                  </td> */}
-                  <td className="px-6 py-4">
+                  </td>
+                  {/* columna  */}
+                  <td className="px-6 py-4 col-auto content-center">
                     <Button
                       onClick={() => handleViewDetail(activity)}
                       variant="destructive"
@@ -85,6 +86,14 @@ export const ActivityTable = ({ activities }: ActivityTableProps) => {
                     >
                       Ver detalle
                     </Button>
+
+                    {/* <Button
+                      onClick={() => deleteActivityMutation.mutate(activity.id)}
+                      variant="destructive"
+                      size="sm"
+                    >
+                      Eliminar
+                    </Button> */}
                   </td>
                 </tr>
               );
@@ -92,7 +101,7 @@ export const ActivityTable = ({ activities }: ActivityTableProps) => {
           </tbody>
         </table>
       </div>
-      
+
       <ActivityDetailModal
         activity={selectedActivity}
         isOpen={isModalOpen}

@@ -1,7 +1,7 @@
 import styled from 'styled-components';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, memo } from 'react';
 
-const Cardhora = () => {
+const Cardhora = memo(() => {
   const [time, setTime] = useState('00:00:00');
 
   useEffect(() => {
@@ -32,13 +32,14 @@ const Cardhora = () => {
     </StyledWrapper>
   );
 }
+);
 
 const StyledWrapper = styled.div`
   .time-card {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 12px 24px;
+    padding: 1.5rem;
     background: #ffffff;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);

@@ -1,0 +1,463 @@
+import { useState, useEffect, useMemo, memo, useCallback } from 'react';
+import { Card, CardContent } from '@/components/Layout';
+import { Input } from '@/components/Input';
+import { Button } from '@/components/Button';
+import Cardhora from '@/components/Card_hora/card';
+import { ActivityCalendar } from './ActivityCalendar';
+import { useDayConfigStore } from '@/stores';
+import type { DayType } from '@/types/dayConfig';
+
+interface UserConfig {
+    id: string;
+    nombre: string;
+    dependencia: string;
+    cargo: string;
+    fechaInicio: string;
+    fechaTermino: string;
+    horasPorTrabajar: string;
+    selected: boolean;
+}
+
+export const AdminPage = () => {
+    const [searchQuery, setSearchQuery] = useState('');
+    const [selectedDependencia, setSelectedDependencia] = useState('');
+    const [users, setUsers] = useState<UserConfig[]>([]);
+    const [selectedDate, setSelectedDate] = useState<Date>(new Date(2026, 0, 1));
+    const [activeTab, setActiveTab] = useState<'horas' | 'feriados'>('horas');
+    const [horasTrabajar, setHorasTrabajar] = useState('');
+    const [allSelected, setAllSelected] = useState(false);
+    const [dayTypeSelection, setDayTypeSelection] = useState<DayType>('feriado');
+    
+    // Day config store
+    const { setDayConfig, getDayConfig, removeDayConfig } = useDayConfigStore();
+
+    // Lista de dependencias disponibles
+    const dependencias = useMemo(() => {
+        const deps = users.map(u => u.dependencia);
+        return ['Todas', ...Array.from(new Set(deps))];
+    }, [users]);
+
+    // Datos de ejemplo
+    useEffect(() => {
+        const mockUsers: UserConfig[] = [
+            {
+                id: '1',
+                nombre: 'Miguel Carrion Franco',
+                dependencia: 'Informática',
+                cargo: 'Coordinador de informática',
+                fechaInicio: '05/01/2025',
+                fechaTermino: '09/01/2025',
+                horasPorTrabajar: '8 horas',
+                selected: false,
+            },
+            {
+                id: '2',
+                nombre: 'Miguel Valle Lezama',
+                dependencia: 'Informática',
+                cargo: 'Asistente de sistemas',
+                fechaInicio: '05/01/2025',
+                fechaTermino: '09/01/2025',
+                horasPorTrabajar: '8 horas',
+                selected: false,
+            },
+            {
+                id: '3',
+                nombre: 'Alfredo Monzon Rios',
+                dependencia: 'Informática',
+                cargo: 'Asistente de sistemas',
+                fechaInicio: '05/01/2025',
+                fechaTermino: '09/01/2025',
+                horasPorTrabajar: '8 horas',
+                selected: false,
+            },
+            {
+                id: '4',
+                nombre: 'Luis Manco Vilcherres',
+                dependencia: 'Informática',
+                cargo: 'Asistente de sistemas',
+                fechaInicio: '05/01/2025',
+                fechaTermino: '09/01/2025',
+                horasPorTrabajar: '8 horas',
+                selected: false,
+            },
+            {
+                id: '5',
+                nombre: 'Juliocesar Lopez Vasquez',
+                dependencia: 'Informática',
+                cargo: 'Asistente de sistemas',
+                fechaInicio: '05/01/2025',
+                fechaTermino: '09/01/2025',
+                horasPorTrabajar: '8 horas',
+                selected: false,
+            },
+        ];
+        setUsers(mockUsers);
+    }, []);
+
+    const filteredUsers = useMemo(() => {
+        return users.filter((user) => {
+            const matchesSearch = user.nombre.toLowerCase().includes(searchQuery.toLowerCase());
+            const matchesDependencia = !selectedDependencia ||
+                selectedDependencia === 'Todas' ||
+                user.dependencia === selectedDependencia;
+            return matchesSearch && matchesDependencia;
+        });
+    }, [users, searchQuery, selectedDependencia]);
+
+    const selectedCount = useMemo(() => {
+        return users.filter(u => u.selected).length;
+    }, [users]);
+
+    const handleToggleUser = useCallback((userId: string) => {
+        setUsers(prev => prev.map(user =>
+            user.id === userId
+                ? { ...user, selected: !user.selected }
+                : user
+        ));
+    }, []);
+
+    const handleToggleAll = useCallback(() => {
+        const newValue = !allSelected;
+        setAllSelected(newValue);
+        setUsers(prev => prev.map(user => ({ ...user, selected: newValue })));
+    }, [allSt selectedUserIds = selectedUsers.map(u => u.id);
+        
+        if (activeTab === 'horas') {
+            // Aplicar horas trabajadas
+            console.log('Aplicando horas:', horasTrabajar, 'para usuarios:', selectedUsers);
+            // Aquí iría la llamada a la API para actualizar horas
+        } else {
+            // Aplicar feriado o recuperación
+            const dateStr = selectedDate.toISOString().split('T')[0];
+            setDayConfig(dateStr, dayTypeSelection, selectedUserIds);
+            console.log(`Día ${dayTypeSelection} aplicado:`, dateStr, 'para usuarios:', selectedUserIds);
+        }
+        
+        // Actualizar tabla con nuevas horas
+        setUsers(prev => prev.map(user => {
+            if (user.selected) {
+                const newHours = dayTypeSelection === 'recuperacion' ? '9 horas' : 
+                               dayTypeSelection === 'feriado' ? '0 horas (feriado)' : 
+                               `${horasTrabajar} horas`;
+                return { ...user, horasPorTrabajar: newHours };
+            }
+            return user;
+        }));
+    }, [users, horasTrabajar, activeTab, selectedDate, dayTypeSelection, setDayConfig]);
+
+    const handleBorrarFeriados = useCallback(() => {
+        const dateStr = selectedDate.toISOString().split('T')[0];
+        removeDayConfig(dateStr);
+        console.log('Feriados borrados para:', dateStr);
+        
+        // Restaurar horas normales (8 horas)
+        setUsers(prev => prev.map(user => {
+            if (user.selected) {
+                return { ...user, horasPorTrabajar: '8 horas' };
+            }
+            return user;
+        }));
+    }, [selectedDate, removeDayConfig]);
+
+    // Obtener configuración del día seleccionado
+    const currentDayConfig = useMemo(() => {
+        const dateStr = selectedDate.toISOString().split('T')[0];
+        return getDayConfig(dateStr);
+    }, [selectedDate, getDayConfigeCallback(() => {
+        const selectedUsers = users.filter(u => u.selected);
+        console.log('Aplicando configuración para:', selectedUsers, 'Horas:', horasTrabajar);
+        // Aquí iría la llamada a la API
+    }, [users, horasTrabajar]);
+
+    return (
+        <div className="min-h-screen bg-slate-50 p-6">
+            <div className="mx-auto max-w-7xl">
+                {/* Header */}
+                <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <h1 className="text-3xl font-bold text-slate-900">Configuración de horas trabajadas</h1>
+                    <Cardhora />
+                </div>
+
+                {/* Main Layout Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                    {/* Left Side - Filters */}
+                    <Card>
+                        <CardContent className="pt-6">
+                            <div className="space-y-4">
+                                {/* Filtro por dependencia */}
+                                <div className="space-y-2">
+                                    <label className="text-sm font-semibold text-slate-700">
+                                        Filtrar por dependencia
+                                    </label>
+                                    <select
+                                        value={selectedDependencia}
+                                        onChange={(e) => setSelectedDependencia(e.target.value)}
+                                        className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a71900] focus:border-transparent bg-white text-slate-600"
+                                    >
+                                        <option value="">Seleccionar dependencia</option>
+                                        {dependencias.map((dep) => (
+                                            <option key={dep} value={dep}>
+                                                {dep}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                {/* Buscar usuario */}
+                                <div className="space-y-2">
+                                    <label className="text-sm font-semibold text-slate-700">
+                                        Buscar usuario
+                                    </label>
+                                    <div className="relative">
+                                        <svg
+                                            className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                                            />
+                                        </svg>
+                                        <Input
+                                            type="text"
+                                            placeholder="Buscar usuario por nombres y/o apellidos"
+                                            value={searchQuery}
+                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                            className="pl-10 w-full"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </CardCo{activeTab === 'horas' ? (
+                                    <div className="space-y-3">
+                                        <p className="text-sm text-gray-600">
+                                            Durante este rango de fechas se trabajarán
+                                        </p>
+                                        <div className="flex items-center gap-2">
+                                            <Input
+                                                type="number"
+                                                value={horasTrabajar}
+                                                onChange={(e) => setHorasTrabajar(e.target.value)}
+                                                placeholder="--"
+                                                className="w-20 text-center"
+                                            />
+                                            <span className="text-sm text-gray-700">
+                                                horas para los servidores seleccionados.
+                                            </span>
+                                        </div>
+                                        <Button
+                                            onClick={handleAplicar}
+                                            disabled={selectedCount === 0 || !horasTrabajar}
+                                            style={{ backgroundColor: '#a71900' }}
+                                            className="w-full bg-[#a71900] hover:bg-[#8b1538] text-white py-3 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            Aplicar para seleccionados
+                                        </Button>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-4">
+                                        <p className="text-sm text-gray-700 font-medium">
+                                            Definir las fechas seleccionadas como feriados no laborales.
+                                        </p>
+                                        
+                                        {/* Información del día seleccionado */}
+                                        {currentDayConfig && (
+                                            <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                                                <p className="text-xs text-amber-900 font-semibold">
+                                                    Este día está marcado como:{' '}
+                                                    <span className="uppercase">{currentDayConfig.type}</span>
+                                                </p>
+                                                <p className="text-xs text-amber-700 mt-1">
+                                                    Horas requeridas: {currentDayConfig.horasRequeridas}h
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        {/* Selector de tipo de día */}
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-semibold text-slate-700">
+                                                Tipo de día especial
+                                            </label>
+                                            <div className="grid grid-cols-2 gap-2">
+                                                <button
+                                                    onClick={() => setDayTypeSelection('feriado')}
+                                                    className={`px-4 py-3 rounded-lg border-2 transition-all ${
+                                                        dayTypeSelection === 'feriado'
+                                                            ? 'border-red-500 bg-red-50 text-red-700'
+                                                            : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
+                                                    }`}
+                                                >
+                                                    <div className="text-sm font-semibold">Feriado</div>
+                                                    <div className="text-xs mt-1">0 horas</div>
+                                                </button>
+                                                <button
+                                                    onClick={() => setDayTypeSelection('recuperacion')}
+                                                    className={`px-4 py-3 rounded-lg border-2 transition-all ${
+                                                        dayTypeSelection === 'recuperacion'
+                                                            ? 'border-amber-500 bg-amber-50 text-amber-700'
+                                                            : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
+                                                    }`}
+                                                >
+                                                    <div className="text-sm font-semibold">Recuperación</div>
+                                                    <div className="text-xs mt-1">9 horas (8+1)</div>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex gap-2">
+                                            <Button
+                                                onClick={handleAplicar}
+                                                disabled={selectedCount === 0}
+                                                style={{ backgroundColor: '#a71900' }}
+                                                className="flex-1 bg-[#a71900] hover:bg-[#8b1538] text-white py-3 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                                            >
+                                                Aplicar feriados
+                                            </Button>
+                                            <Button
+                                                onClick={handleBorrarFeriados}
+                                                variant="outline"
+                                                className="flex-1 border-red-300 text-red-700 hover:bg-red-50 py-3 font-semibold"
+                                            >
+                                                Borrar feriados
+                                            </Button>
+                                        </div>
+                                    </div>
+                                )}          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                            }`}
+                                    >
+                                        Horas a trabajar
+                                    </button>
+                                    <button
+                                        onClick={() => setActiveTab('feriados')}
+                                        className={`flex-1 px-4 py-2 rounded-lg font-semibold transition-colors ${activeTab === 'feriados'
+                                                ? 'bg-[#f4a6a6] text-[#a71900]'
+                                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                            }`}
+                                    >
+                                        Feriados
+                                    </button>
+                                </div>
+
+                                {/* Config Section */}
+                                <div className="space-y-3">
+                                    <p className="text-sm text-gray-600">
+                                        Durante este rango de fechas se trabajarán
+                                    </p>
+                                    <div className="flex items-center gap-2">
+                                        <Input
+                                            type="number"
+                                            value={horasTrabajar}
+                                            onChange={(e) => setHorasTrabajar(e.target.value)}
+                                            placeholder="--"
+                                            className="w-20 text-center"
+                                        />
+                                        <span className="text-sm text-gray-700">
+                                            horas para los servidores seleccionados.
+                                        </span>
+                                    </div>
+                                    <Button
+                                        onClick={handleAplicar}
+                                        disabled={selectedCount === 0 || !horasTrabajar}
+                                        style={{ backgroundColor: '#a71900' }}
+                                        className="w-full bg-[#a71900] hover:bg-[#8b1538] text-white py-3 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        Aplicar para seleccionados
+                                    </Button>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+
+                {/* Table */}
+                <Card>
+                    <CardContent className="p-0">
+                        <div className="overflow-x-auto">
+                            <table className="w-full">
+                                <thead style={{ backgroundColor: '#a71900' }}>
+                                    <tr>
+                                        <th className="px-6 py-4 text-center">
+                                            <input
+                                                type="checkbox"
+                                                checked={allSelected}
+                                                onChange={handleToggleAll}
+                                                className="w-5 h-5 rounded border-white text-[#a71900] focus:ring-2 focus:ring-white cursor-pointer"
+                                            />
+                                        </th>
+                                        <th className="px-6 py-4 text-left text-sm font-semibold text-white">
+                                            Nombre
+                                        </th>
+                                        <th className="px-6 py-4 text-left text-sm font-semibold text-white">
+                                            Dependencia
+                                        </th>
+                                        <th className="px-6 py-4 text-left text-sm font-semibold text-white">
+                                            Cargo
+                                        </th>
+                                        <th className="px-6 py-4 text-left text-sm font-semibold text-white">
+                                            Fecha inicio
+                                        </th>
+                                        <th className="px-6 py-4 text-left text-sm font-semibold text-white">
+                                            Fecha termino
+                                        </th>
+                                        <th className="px-6 py-4 text-left text-sm font-semibold text-white">
+                                            Horas por trabajar
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-200 bg-white">
+                                    {filteredUsers.length > 0 ? (
+                                        filteredUsers.map((user) => (
+                                            <tr key={user.id} className="hover:bg-slate-50 transition-colors">
+                                                <td className="px-6 py-4 text-center">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={user.selected}
+                                                        onChange={() => handleToggleUser(user.id)}
+                                                        className="w-5 h-5 rounded border-slate-300 text-[#a71900] focus:ring-2 focus:ring-[#a71900] cursor-pointer"
+                                                    />
+                                                </td>
+                                                <td className="px-6 py-4 text-sm text-slate-900">
+                                                    {user.nombre}
+                                                </td>
+                                                <td className="px-6 py-4 text-sm text-slate-600">
+                                                    {user.dependencia}
+                                                </td>
+                                                <td className="px-6 py-4 text-sm text-slate-600">
+                                                    {user.cargo}
+                                                </td>
+                                                <td className="px-6 py-4 text-sm text-slate-600">
+                                                    {user.fechaInicio}
+                                                </td>
+                                                <td className="px-6 py-4 text-sm text-slate-600">
+                                                    {user.fechaTermino}
+                                                </td>
+                                                <td className="px-6 py-4 text-sm text-slate-600">
+                                                    {user.horasPorTrabajar}
+                                                </td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td
+                                                colSpan={7}
+                                                className="px-6 py-8 text-center text-sm text-slate-500"
+                                            >
+                                                No se encontraron usuarios
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+        </div>
+    );
+};
+
+export default memo(AdminPage);

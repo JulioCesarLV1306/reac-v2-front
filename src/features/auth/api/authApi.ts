@@ -21,9 +21,13 @@ export const authApi = {
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     // Simulación de validación
-    if (credentials.email === 'demo@example.com' && credentials.password === 'demo123') {
+    if (credentials.email && credentials.password) {
       return {
-        user: mockUser,
+        user: {
+          ...mockUser,
+          name: credentials.email.split('@')[0],
+          email: credentials.email,
+        },
         token: 'mock-jwt-token-xyz',
       };
     }

@@ -3,6 +3,8 @@
  */
 
 export interface Activity {
+  endTime: any;
+  startTime: any;
   id: string;
   title: string;
   description: string;
