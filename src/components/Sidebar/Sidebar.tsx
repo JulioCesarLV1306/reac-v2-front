@@ -66,7 +66,7 @@ const Sidebar = ({
     <div
       className={`
         flex flex-col h-screen relative
-        bg-linear-to-br from-white via-gray-50/50 to-white
+        bg-linear-to-br from-white  via-gray-50/50 to-white
         border-r border-gray-200/80 backdrop-blur-xl
         transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)]
         ${isOpen ? 'w-85 px-6 py-7' : 'w-22 px-4 py-7'} 

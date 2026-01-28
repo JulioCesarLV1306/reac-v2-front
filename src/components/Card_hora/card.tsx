@@ -56,7 +56,7 @@ const StyledWrapper = styled.div`
     color: #000;
     font-weight: 900;
     font-family: 'Inter', sans-serif;
-    letter-spacing: 2px;
+    letter-spacing: 1.5px;
   }
 `;
 
